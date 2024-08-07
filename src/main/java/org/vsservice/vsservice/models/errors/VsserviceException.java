@@ -2,11 +2,13 @@ package org.vsservice.vsservice.models.errors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @JsonIgnoreProperties({"stackTrace", "localization"})
-public class VsserviceException {
+public class VsserviceException extends Exception {
     private final String message;
     private final String causeMessage;
 

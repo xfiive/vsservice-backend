@@ -7,6 +7,7 @@ import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -35,6 +36,23 @@ public class GlobalExceptionController {
             headers.put(headerName, servletRequest.getHeader(headerName));
         }
         return new RequestData(path, method, clientIp, headers);
+    }
+
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(@NotNull MethodArgumentNotValidException exception, WebRequest request, Locale locale) {
+        RequestData requestData = getRequestData((ServletWebRequest) request);
+
+        VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
+                HttpStatus.NOT_ACCEPTABLE,
+                "Error on fetching data: " + exception.getMessage(),
+                requestData.path,
+                requestData.method,
+                requestData.clientIp,
+                requestData.headers,
+                new VsserviceException(exception)
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
 
     @ExceptionHandler(NullPointerException.class)
