@@ -15,7 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @Data
-public class VsserviceErrorResponse implements ErrorResponse {
+public class VsserviceErrorResponse extends Throwable implements ErrorResponse {
     private final HttpStatusCode statusCode;
     @JsonIgnore // -- made this not to copy already given json data
     private final ProblemDetail problemDetail;
