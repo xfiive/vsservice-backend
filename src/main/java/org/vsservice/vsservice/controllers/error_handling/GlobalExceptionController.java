@@ -1,4 +1,4 @@
-package org.vsservice.vsservice.controllers;
+package org.vsservice.vsservice.controllers.error_handling;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.Contract;
