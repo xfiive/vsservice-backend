@@ -12,6 +12,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -23,8 +24,6 @@ public class Product {
 
     @Id
     @JsonProperty("id")
-    @NotBlank(message = "Id cannot be blank or null")
-    @Size(min = 1, message = "Id cannot be blank or null")
     private String id;
 
     @Field
@@ -42,4 +41,19 @@ public class Product {
     @NotBlank(message = "Name cannot be blank or null")
     @Size(min = 2, message = "Name cannot be blank or null")
     private String name;
+
+    @Field
+    @JsonProperty("price")
+    @NotNull(message = "Price cannot be empty or null")
+    private BigDecimal price;
+
+
+    synchronized public void copy(@org.jetbrains.annotations.NotNull Product product, String id) {
+        this.setId(id);
+        this.setImageBase64(product.getImageBase64());
+        this.setName(product.getName());
+        this.setProperties(product.getProperties());
+        this.setPrice(product.getPrice());
+    }
+
 }

@@ -1,4 +1,4 @@
-package org.vsservice.vsservice.controllers.errors;
+package org.vsservice.vsservice.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.Contract;
@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +39,22 @@ public class GlobalExceptionController {
         return new RequestData(path, method, clientIp, headers);
     }
 
+    @ExceptionHandler(VsserviceException.class)
+    public ResponseEntity<ErrorResponse> handleVsserviceException(@NotNull VsserviceException exception, WebRequest request, Locale locale) {
+        RequestData requestData = getRequestData((ServletWebRequest) request);
+
+        VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
+                HttpStatus.NOT_ACCEPTABLE,
+                "Error on fetching data: " + exception.getMessage(),
+                requestData.path,
+                requestData.method,
+                requestData.clientIp,
+                requestData.headers,
+                exception.getCauseMessage(),
+                exception
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(@NotNull MethodArgumentNotValidException exception, WebRequest request, Locale locale) {
@@ -50,6 +67,7 @@ public class GlobalExceptionController {
                 requestData.method,
                 requestData.clientIp,
                 requestData.headers,
+                exception.getCause().getMessage(),
                 new VsserviceException(exception)
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
@@ -66,6 +84,7 @@ public class GlobalExceptionController {
                 requestData.method,
                 requestData.clientIp,
                 requestData.headers,
+                exception.getCause().getMessage(),
                 new VsserviceException(exception)
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
@@ -76,32 +95,34 @@ public class GlobalExceptionController {
         RequestData requestData = getRequestData((ServletWebRequest) request);
 
         VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
-                HttpStatus.NOT_FOUND,
-                "Fetching data error: " + exception.getMessage(),
+                HttpStatus.NOT_ACCEPTABLE,
+                "Error on fetching data: " + exception.getMessage(),
                 requestData.path,
                 requestData.method,
                 requestData.clientIp,
                 requestData.headers,
+                exception.getCause().getMessage(),
                 new VsserviceException(exception)
         );
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(@NotNull Exception exception, WebRequest request, Locale locale) {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(@NotNull HttpMessageNotReadableException exception, WebRequest request, Locale locale) {
         RequestData requestData = getRequestData((ServletWebRequest) request);
 
         VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
-                HttpStatus.NOT_FOUND,
-                "General error: " + exception.getMessage(),
+                HttpStatus.NOT_ACCEPTABLE,
+                "Invalid request to server: " + exception.getMessage(),
                 requestData.path,
                 requestData.method,
                 requestData.clientIp,
                 requestData.headers,
+                exception.getCause().getMessage(),
                 new VsserviceException(exception)
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
 
     private record RequestData(String path, String method, String clientIp, Map<String, String> headers) {

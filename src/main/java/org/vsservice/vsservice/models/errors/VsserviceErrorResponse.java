@@ -26,10 +26,12 @@ public class VsserviceErrorResponse extends Throwable implements ErrorResponse {
     @JsonIgnore // -- made this not to copy already given json data
     private final String clientIp;
     private final Map<String, String> headers;
+    private final String causeDescription;
     private final VsserviceException cause;
 
-    public VsserviceErrorResponse(HttpStatusCode statusCode, String detail, String path, String method, String clientIp, Map<String, String> headers, VsserviceException cause) {
+    public VsserviceErrorResponse(HttpStatusCode statusCode, String detail, String path, String method, String clientIp, Map<String, String> headers, String causeDescription, VsserviceException cause) {
         this.statusCode = statusCode;
+        this.causeDescription = causeDescription;
         this.cause = cause;
         this.problemDetail = ProblemDetail.forStatusAndDetail(statusCode, detail);
         this.path = path;
