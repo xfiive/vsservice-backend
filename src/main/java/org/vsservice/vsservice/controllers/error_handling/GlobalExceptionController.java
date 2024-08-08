@@ -18,7 +18,6 @@ import org.vsservice.vsservice.models.errors.VsserviceException;
 
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -40,7 +39,7 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(VsserviceException.class)
-    public ResponseEntity<ErrorResponse> handleVsserviceException(@NotNull VsserviceException exception, WebRequest request, Locale locale) {
+    public ResponseEntity<ErrorResponse> handleVsserviceException(@NotNull VsserviceException exception, WebRequest request) {
         RequestData requestData = getRequestData((ServletWebRequest) request);
 
         VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
@@ -57,7 +56,7 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(@NotNull MethodArgumentNotValidException exception, WebRequest request, Locale locale) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(@NotNull MethodArgumentNotValidException exception, WebRequest request) {
         RequestData requestData = getRequestData((ServletWebRequest) request);
 
         VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
@@ -74,7 +73,7 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<ErrorResponse> handleNullPointerException(@NotNull NullPointerException exception, WebRequest request, Locale locale) {
+    public ResponseEntity<ErrorResponse> handleNullPointerException(@NotNull NullPointerException exception, WebRequest request) {
         RequestData requestData = getRequestData((ServletWebRequest) request);
 
         VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
@@ -91,7 +90,7 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(ConversionNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleConversionNotSupportedException(@NotNull ConversionNotSupportedException exception, WebRequest request, Locale locale) {
+    public ResponseEntity<ErrorResponse> handleConversionNotSupportedException(@NotNull ConversionNotSupportedException exception, WebRequest request) {
         RequestData requestData = getRequestData((ServletWebRequest) request);
 
         VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
@@ -109,7 +108,7 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(@NotNull HttpMessageNotReadableException exception, WebRequest request, Locale locale) {
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(@NotNull HttpMessageNotReadableException exception, WebRequest request) {
         RequestData requestData = getRequestData((ServletWebRequest) request);
 
         VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
