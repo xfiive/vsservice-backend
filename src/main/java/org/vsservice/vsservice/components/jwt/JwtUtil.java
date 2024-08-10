@@ -1,4 +1,4 @@
-package org.vsservice.vsservice.components;
+package org.vsservice.vsservice.components.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
@@ -13,13 +13,14 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
 
     @Value("${jwt.secret}")
-    private String SECRET_KEY; // 512-bit base64 encoded key
+    private String SECRET_KEY;
 
     private @NotNull Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
@@ -29,6 +30,7 @@ public class JwtUtil {
     public String generateAccessToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", List.of("ROLE_ADMIN"))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 15 minutes
                 .signWith(getSigningKey())
@@ -38,6 +40,7 @@ public class JwtUtil {
     public String generateRefreshToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", List.of("ROLE_ADMIN"))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 7 days
                 .signWith(getSigningKey())
