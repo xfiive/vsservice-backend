@@ -10,7 +10,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vsservice.vsservice.models.Product;
-import org.vsservice.vsservice.models.errors.VsserviceErrorResponse;
 import org.vsservice.vsservice.models.errors.VsserviceException;
 import org.vsservice.vsservice.repositories.ProductRepository;
 
@@ -108,7 +107,27 @@ public class ProductService {
     }
 
     @Recover
-    public void throwErrorResponse(@NotNull VsserviceErrorResponse e) throws VsserviceErrorResponse {
-        throw e;
+    public Optional<Product> recoverVsserviceException(@NotNull VsserviceException e, String id) {
+        log.error("Failed after retries. Exception: {}", e.getMessage());
+        return Optional.empty();
     }
+
+    @Recover
+    public Optional<Product> recoverFromGetProduct(@NotNull VsserviceException e, String id) {
+        log.error("Failed to retrieve product with id: {} after retries. Exception: {}", id, e.getMessage());
+        return Optional.empty();
+    }
+
+    @Recover
+    public Optional<Product> recoverFromAddProduct(@NotNull VsserviceException e, Product product) {
+        log.error("Failed to add product after retries. Exception: {}", e.getMessage());
+        return Optional.empty();
+    }
+
+    @Recover
+    public Optional<Product> recoverFromUpdateProduct(@NotNull VsserviceException e, Product product, String id) {
+        log.error("Failed to update product with id: {} after retries. Exception: {}", id, e.getMessage());
+        return Optional.empty();
+    }
+
 }

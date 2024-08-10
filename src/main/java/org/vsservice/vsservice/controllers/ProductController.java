@@ -16,10 +16,10 @@ import org.vsservice.vsservice.services.ProductService;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Validated
 public class ProductController {
 
     private final ProductService productService;
