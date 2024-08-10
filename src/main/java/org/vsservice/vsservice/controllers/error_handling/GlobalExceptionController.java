@@ -7,6 +7,8 @@ import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -123,6 +125,41 @@ public class GlobalExceptionController {
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(@NotNull AccessDeniedException exception, WebRequest request) {
+        RequestData requestData = getRequestData((ServletWebRequest) request);
+
+        VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
+                HttpStatus.FORBIDDEN,
+                "Access Denied: " + exception.getMessage(),
+                requestData.path,
+                requestData.method,
+                requestData.clientIp,
+                requestData.headers,
+                exception.getCause() != null ? exception.getCause().getMessage() : null,
+                new VsserviceException(exception)
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(@NotNull AuthenticationException exception, WebRequest request) {
+        RequestData requestData = getRequestData((ServletWebRequest) request);
+
+        VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                "Unauthorized: " + exception.getMessage(),
+                requestData.path,
+                requestData.method,
+                requestData.clientIp,
+                requestData.headers,
+                exception.getCause() != null ? exception.getCause().getMessage() : null,
+                new VsserviceException(exception)
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
 
     private record RequestData(String path, String method, String clientIp, Map<String, String> headers) {
     }
