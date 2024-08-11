@@ -1,6 +1,10 @@
 package org.vsservice.vsservice.controllers;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +21,11 @@ import org.vsservice.vsservice.models.security.RefreshToken;
 import org.vsservice.vsservice.services.AdminService;
 import org.vsservice.vsservice.services.RefreshTokenService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
 @Validated
 @RestController
+@Slf4j
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class AdminController {
@@ -38,33 +42,63 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> authenticateAdmin(@Validated @RequestBody Admin admin) {
+    public ResponseEntity<Object> authenticateAdmin(@Validated @RequestBody Admin admin, HttpServletResponse response) {
         return adminService.authenticateAdmin(admin.getUsername(), admin.getPassword())
                 .map(authenticatedAdmin -> {
-                    String accessToken = jwtUtil.generateAccessToken(authenticatedAdmin.getUsername());
-                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedAdmin.getUsername());
+                    log.info("Login successful for user: {}", authenticatedAdmin.getUsername());
 
-                    Map<String, String> tokens = new HashMap<>();
-                    tokens.put("access_token", accessToken);
-                    tokens.put("refresh_token", refreshToken.getToken());
-                    return new ResponseEntity<>(tokens, HttpStatus.OK);
+                    String accessToken = jwtUtil.generateAccessToken(authenticatedAdmin.getUsername());
+                    String refreshToken = refreshTokenService.createRefreshToken(authenticatedAdmin.getUsername()).getToken();
+
+                    Cookie accessTokenCookie = new Cookie("access_token", accessToken);
+                    accessTokenCookie.setHttpOnly(true);
+                    accessTokenCookie.setSecure(true);
+                    accessTokenCookie.setPath("/");
+                    accessTokenCookie.setMaxAge(15 * 60);
+
+                    Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+                    refreshTokenCookie.setHttpOnly(true);
+                    refreshTokenCookie.setSecure(true);
+                    refreshTokenCookie.setPath("/");
+                    refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
+
+                    response.addCookie(accessTokenCookie);
+                    response.addCookie(refreshTokenCookie);
+
+                    return new ResponseEntity<>(HttpStatus.OK);
                 })
-                .orElseThrow(() -> new AuthenticationException("Failed to authenticate user", "Invalid login data"));
+                .orElseThrow(() -> {
+                    log.info("Login failed for user: {}", admin.getUsername());
+                    throw new AuthenticationException("Failed to authenticate user", "Invalid login data");
+                });
     }
 
+
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refreshAccessToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refresh_token");
+    public ResponseEntity<Object> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = Arrays.stream(request.getCookies())
+                .filter(cookie -> "refresh_token".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new TokenRefreshException("No refresh token found", "Refresh token is missing"));
 
         return refreshTokenService.findByToken(refreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUsername)
                 .map(username -> {
                     String accessToken = jwtUtil.generateAccessToken(username);
-                    Map<String, String> tokens = new HashMap<>();
-                    tokens.put("access_token", accessToken);
-                    return new ResponseEntity<>(tokens, HttpStatus.OK);
+
+                    Cookie accessTokenCookie = new Cookie("access_token", accessToken);
+                    accessTokenCookie.setHttpOnly(true);
+                    accessTokenCookie.setSecure(true);
+                    accessTokenCookie.setPath("/");
+                    accessTokenCookie.setMaxAge(15 * 60);
+
+                    response.addCookie(accessTokenCookie);
+
+                    return new ResponseEntity<>(HttpStatus.OK);
                 })
                 .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh token is not valid!"));
     }
+
 }
