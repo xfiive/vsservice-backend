@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.vsservice.vsservice.components.jwt.JwtUtil;
+import org.vsservice.vsservice.models.dtos.AdminDto;
 import org.vsservice.vsservice.models.errors.AuthenticationException;
 import org.vsservice.vsservice.models.errors.TokenRefreshException;
 import org.vsservice.vsservice.models.roles.Admin;
@@ -42,7 +43,7 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> authenticateAdmin(@Validated @RequestBody Admin admin, HttpServletResponse response) {
+    public ResponseEntity<AdminDto> authenticateAdmin(@Validated @RequestBody Admin admin, HttpServletResponse response) {
         return adminService.authenticateAdmin(admin.getUsername(), admin.getPassword())
                 .map(authenticatedAdmin -> {
                     log.info("Login successful for user: {}", authenticatedAdmin.getUsername());
@@ -65,11 +66,18 @@ public class AdminController {
                     response.addCookie(accessTokenCookie);
                     response.addCookie(refreshTokenCookie);
 
-                    return new ResponseEntity<>(HttpStatus.OK);
+                    log.info("authenticatedAdminDto: {}", AdminDto.builder()
+                            .name(authenticatedAdmin.getUsername())
+                            .build());
+
+                    return new ResponseEntity<>(AdminDto.builder()
+                            .name(authenticatedAdmin.getUsername())
+                            .build(),
+                            HttpStatus.OK);
                 })
                 .orElseThrow(() -> {
                     log.info("Login failed for user: {}", admin.getUsername());
-                    throw new AuthenticationException("Failed to authenticate user", "Invalid login data");
+                    return new AuthenticationException("Failed to authenticate user", "Invalid login data");
                 });
     }
 
