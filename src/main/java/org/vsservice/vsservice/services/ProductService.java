@@ -51,7 +51,7 @@ public class ProductService {
         Optional<Product> existingProductOpt = productRepository.findById(id);
 
         existingProductOpt.ifPresent(existingProduct -> {
-            existingProduct.copy(product, id);
+            existingProduct.copyProduct(product, id);
             productRepository.save(existingProduct);
         });
 
