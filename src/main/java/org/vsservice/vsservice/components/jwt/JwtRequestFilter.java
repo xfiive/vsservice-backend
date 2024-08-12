@@ -3,6 +3,7 @@ package org.vsservice.vsservice.components.jwt;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.vsservice.vsservice.models.errors.AuthenticationException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -38,20 +40,34 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         log.info("Request path: {}", path);
 
-        if ("/api/admin/login" .equals(path) || "/api/admin/refresh" .equals(path)) {
+        if ("/api/admin/login".equals(path) || "/api/admin/refresh".equals(path)) {
             chain.doFilter(request, response);
             return;
         }
 
         final String authorizationHeader = request.getHeader("Authorization");
-
-        log.info("Authorization Header: {}", authorizationHeader);
-
-        String username = null;
         String jwt = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
+            log.info("JWT from Authorization header: {}", jwt);
+        } else {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                jwt = Arrays.stream(cookies)
+                        .filter(cookie -> "access_token".equals(cookie.getName()))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        .orElse(null);
+                log.info("JWT from cookies: {}", jwt);
+            }
+        }
+
+        log.info("Authorization Header or Cookie JWT: {}", jwt);
+
+        String username = null;
+
+        if (jwt != null) {
             try {
                 username = jwtUtil.extractUsername(jwt);
                 log.info("Extracted Username: {}", username);
@@ -72,12 +88,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                 log.info("Authentication set for user: {}", username);
+                log.info("User roles: {}", userDetails.getAuthorities());
             } else {
                 log.warn("Invalid JWT Token");
             }
+
         }
 
         chain.doFilter(request, response);
     }
-
 }
