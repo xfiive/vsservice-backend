@@ -48,14 +48,6 @@ public class Product {
     @JsonProperty("price")
     private BigDecimal price;
 
-    synchronized static public Product createProductFromDto(@org.jetbrains.annotations.NotNull ProductDto dto) {
-        return Product.builder().name(dto.getName()).id(dto.getId()).properties(dto.getProperties()).price(dto.getPrice()).imageBase64(dto.getImageBase64()).build();
-    }
-
-    synchronized static public ProductDto createDtoFromProduct(@org.jetbrains.annotations.NotNull Product product) {
-        return ProductDto.builder().name(product.getName()).id(product.getId()).properties(product.getProperties()).price(product.getPrice()).imageBase64(product.getImageBase64()).build();
-    }
-
     synchronized public void copyProduct(@org.jetbrains.annotations.NotNull Product product, String id) {
         this.setId(id);
         this.setImageBase64(product.getImageBase64());
@@ -63,13 +55,4 @@ public class Product {
         this.setProperties(product.getProperties());
         this.setPrice(product.getPrice());
     }
-
-    synchronized public void copyProductDto(@org.jetbrains.annotations.NotNull ProductDto dto) {
-        if (dto.getId() != null) this.setId(dto.getId());
-        if (dto.getName() != null) this.setName(dto.getName());
-        if (dto.getPrice() != null) this.setPrice(dto.getPrice());
-        if (dto.getProperties() != null) this.setProperties(dto.getProperties());
-        if (dto.getImageBase64() != null) this.setImageBase64(dto.getImageBase64());
-    }
-
 }

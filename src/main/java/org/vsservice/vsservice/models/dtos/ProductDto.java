@@ -34,14 +34,4 @@ public class ProductDto {
 
     @JsonProperty("price")
     private BigDecimal price;
-
-//    synchronized static Product createDtoFromProduct(@org.jetbrains.annotations.NotNull Product product) {
-//        Product newProduct = new Product();
-//        if (dto.getId() != null) newProduct.setId(dto.getId());
-//        if (dto.getName() != null) newProduct.setName(dto.getName());
-//        if (dto.getPrice() != null) newProduct.setPrice(dto.getPrice());
-//        if (dto.getProperties() != null) newProduct.setProperties(dto.getProperties());
-//        if (dto.getImageBase64() != null) newProduct.setImageBase64(dto.getImageBase64());
-//        return newProduct;
-//    }
 }
