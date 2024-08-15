@@ -72,4 +72,11 @@ public class ProductController {
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseThrow(() -> new VsserviceException(new RuntimeException()));
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteProduct(@RequestParam("id") @NotBlank String id) {
+        this.productService.deleteProduct(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

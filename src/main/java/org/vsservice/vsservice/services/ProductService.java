@@ -26,7 +26,7 @@ public class ProductService {
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     public Optional<Product> getProduct(String id) {
         return this.productRepository.findById(id);
@@ -34,7 +34,7 @@ public class ProductService {
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     public Optional<Product> addProduct(@NotNull Product product) {
         if (product.getId() != null && productRepository.findById(product.getId()).isPresent()) {
@@ -45,7 +45,7 @@ public class ProductService {
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     public Optional<Product> updateProduct(Product product, String id) {
         Optional<Product> existingProductOpt = productRepository.findById(id);
@@ -60,7 +60,7 @@ public class ProductService {
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     public Optional<Product> updateProperties(List<String> properties, String id) {
         Product existingProduct = productRepository.findById(id)
@@ -72,7 +72,7 @@ public class ProductService {
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     public Optional<Product> updateImage(String imageBase64, String id) {
         Product existingProduct = productRepository.findById(id)
@@ -84,7 +84,7 @@ public class ProductService {
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     public Optional<Product> updateName(String name, String id) {
         Product existingProduct = productRepository.findById(id)
@@ -96,7 +96,7 @@ public class ProductService {
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     public Optional<Product> updatePrice(BigDecimal price, String id) {
         Product existingProduct = productRepository.findById(id)
@@ -104,6 +104,17 @@ public class ProductService {
 
         existingProduct.setPrice(price);
         return Optional.of(productRepository.save(existingProduct));
+    }
+
+    @Transactional
+    @Retryable(value = {VsserviceException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 250))
+    public void deleteProduct(String id) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new VsserviceException("Failed to delete product", "Product not found"));
+
+        productRepository.delete(existingProduct);
     }
 
     @Recover
