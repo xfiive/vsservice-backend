@@ -1,4 +1,4 @@
-package org.vsservice.vsservice.config;
+package org.vsservice.vsservice.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
