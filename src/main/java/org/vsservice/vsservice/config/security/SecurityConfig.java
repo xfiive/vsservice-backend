@@ -1,4 +1,4 @@
-package org.vsservice.vsservice.config;
+package org.vsservice.vsservice.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
