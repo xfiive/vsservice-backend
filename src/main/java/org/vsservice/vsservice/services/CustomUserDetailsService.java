@@ -2,6 +2,7 @@ package org.vsservice.vsservice.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,10 +17,10 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CustomUserDetailsService implements UserDetailsService {
 
-
     private final AdminRepository adminRepository;
 
     @Override
+    @CachePut(value = "userDetails", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Admin admin = adminRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));

@@ -23,6 +23,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@SuppressWarnings({"deprecation", "unused"})
 public class ProductService {
 
     private final ProductRepository productRepository;

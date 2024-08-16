@@ -30,7 +30,7 @@ public class RefreshTokenService {
     private Long refreshTokenDurationMs;
 
     @Cacheable(value = "refreshTokens", key = "#token", unless = "#result == null")
-    @SuppressWarnings("'Optional.get()' without 'isPresent()' check")
+    @SuppressWarnings("all")
     public RefreshToken findByToken(String token) {
         return refreshTokenRepository.findByToken(token).get();
     }
