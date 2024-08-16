@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
@@ -28,14 +31,18 @@ public class ProductService {
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
-    public Optional<Product> getProduct(String id) {
-        return this.productRepository.findById(id);
+    @Cacheable(value = "products", key = "#id")
+    public Product getProduct(String id) {
+        return this.productRepository.findById(id)
+                .orElseThrow(() -> new VsserviceException("Failed to add new product", "Such product already exists"));
     }
+
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
+    @CachePut(value = "products", key = "#product.id")
     public Optional<Product> addProduct(@NotNull Product product) {
         if (product.getId() != null && productRepository.findById(product.getId()).isPresent()) {
             throw new VsserviceException("Failed to add new product", "Such product already exists");
@@ -47,69 +54,76 @@ public class ProductService {
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
-    public Optional<Product> updateProduct(Product product, String id) {
-        Optional<Product> existingProductOpt = productRepository.findById(id);
+    @CachePut(value = "products", key = "#id")
+    public Product updateProduct(Product product, String id) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new VsserviceException("Failed to update product", "Product not found"));
 
-        existingProductOpt.ifPresent(existingProduct -> {
-            existingProduct.copyProduct(product, id);
-            productRepository.save(existingProduct);
-        });
+        existingProduct.copyProduct(product, id);
+        productRepository.save(existingProduct);
 
-        return Optional.ofNullable(existingProductOpt.orElseThrow(() -> new VsserviceException("Failed to update product", "Product not found")));
+        return existingProduct;
     }
+
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
-    public Optional<Product> updateProperties(List<String> properties, String id) {
+    @CachePut(value = "products", key = "#id")
+    public Product updateProperties(List<String> properties, String id) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new VsserviceException("Failed to update product properties", "Product not found"));
 
         existingProduct.setProperties(properties);
-        return Optional.of(productRepository.save(existingProduct));
+        return productRepository.save(existingProduct);
     }
+
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
-    public Optional<Product> updateImage(String imageBase64, String id) {
+    @CachePut(value = "products", key = "#id")
+    public Product updateImage(String imageBase64, String id) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new VsserviceException("Failed to update product image", "Product not found"));
 
         existingProduct.setImageBase64(imageBase64);
-        return Optional.of(productRepository.save(existingProduct));
+        return productRepository.save(existingProduct);
     }
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
-    public Optional<Product> updateName(String name, String id) {
+    @CachePut(value = "products", key = "#id")
+    public Product updateName(String name, String id) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new VsserviceException("Failed to update product name", "Product not found"));
 
         existingProduct.setName(name);
-        return Optional.of(productRepository.save(existingProduct));
+        return productRepository.save(existingProduct);
     }
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
-    public Optional<Product> updatePrice(BigDecimal price, String id) {
+    @CachePut(value = "products", key = "#id")
+    public Product updatePrice(BigDecimal price, String id) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new VsserviceException("Failed to update product price", "Product not found"));
 
         existingProduct.setPrice(price);
-        return Optional.of(productRepository.save(existingProduct));
+        return productRepository.save(existingProduct);
     }
 
     @Transactional
     @Retryable(value = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
+    @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(String id) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new VsserviceException("Failed to delete product", "Product not found"));
@@ -118,27 +132,27 @@ public class ProductService {
     }
 
     @Recover
-    public Optional<Product> recoverVsserviceException(@NotNull VsserviceException e, String id) {
+    public Product recoverVsserviceException(@NotNull VsserviceException e, String id) {
         log.error("Failed after retries. Exception: {}", e.getMessage());
-        return Optional.empty();
+        return null;
     }
 
     @Recover
-    public Optional<Product> recoverFromGetProduct(@NotNull VsserviceException e, String id) {
+    public Product recoverFromGetProduct(@NotNull VsserviceException e, String id) {
         log.error("Failed to retrieve product with id: {} after retries. Exception: {}", id, e.getMessage());
-        return Optional.empty();
+        return null;
     }
 
     @Recover
-    public Optional<Product> recoverFromAddProduct(@NotNull VsserviceException e, Product product) {
+    public Product recoverFromAddProduct(@NotNull VsserviceException e, Product product) {
         log.error("Failed to add product after retries. Exception: {}", e.getMessage());
-        return Optional.empty();
+        return null;
     }
 
     @Recover
-    public Optional<Product> recoverFromUpdateProduct(@NotNull VsserviceException e, Product product, String id) {
+    public Product recoverFromUpdateProduct(@NotNull VsserviceException e, Product product, String id) {
         log.error("Failed to update product with id: {} after retries. Exception: {}", id, e.getMessage());
-        return Optional.empty();
+        return null;
     }
 
 }

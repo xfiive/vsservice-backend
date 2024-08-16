@@ -23,6 +23,7 @@ import org.vsservice.vsservice.services.AdminService;
 import org.vsservice.vsservice.services.RefreshTokenService;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Validated
 @RestController
@@ -90,7 +91,7 @@ public class AdminController {
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new TokenRefreshException("No refresh token found", "Refresh token is missing"));
 
-        return refreshTokenService.findByToken(refreshToken)
+        return Optional.ofNullable(refreshTokenService.findByToken(refreshToken))
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUsername)
                 .map(username -> {

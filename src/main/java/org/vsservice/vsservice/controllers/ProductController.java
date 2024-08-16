@@ -15,6 +15,7 @@ import org.vsservice.vsservice.services.ProductService;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Validated
 @RestController
@@ -26,7 +27,7 @@ public class ProductController {
 
     @GetMapping("/search")
     public ResponseEntity<Product> getProduct(@RequestParam("id") @NotBlank String id) {
-        return this.productService.getProduct(id)
+        return Optional.ofNullable(this.productService.getProduct(id))
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
@@ -40,35 +41,36 @@ public class ProductController {
 
     @PutMapping
     public ResponseEntity<Product> updateProduct(@Valid @RequestBody Product product, @RequestParam("id") @NotBlank String id) throws VsserviceException {
-        return this.productService.updateProduct(product, id)
-                .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseThrow(() -> new VsserviceException(new RuntimeException()));
+        return Optional.ofNullable(this.productService.updateProduct(product, id))
+                .map(updatedProduct -> new ResponseEntity<>(updatedProduct, HttpStatus.OK))
+                .orElseThrow(() -> new VsserviceException("Failed to update product", "Product not found"));
     }
+
 
     @PatchMapping("/properties")
     public ResponseEntity<Product> updateProperties(@RequestBody @NotNull List<String> properties, @RequestParam("id") @NotBlank String id) throws VsserviceException {
-        return this.productService.updateProperties(properties, id)
+        return Optional.ofNullable(this.productService.updateProperties(properties, id))
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseThrow(() -> new VsserviceException(new RuntimeException()));
     }
 
     @PatchMapping("/image")
     public ResponseEntity<Product> updateImage(@RequestParam("imageBase64") @NotBlank String imageBase64, @RequestParam("id") @NotBlank String id) throws VsserviceException {
-        return this.productService.updateImage(imageBase64, id)
+        return Optional.ofNullable(this.productService.updateImage(imageBase64, id))
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseThrow(() -> new VsserviceException(new RuntimeException()));
     }
 
     @PatchMapping("/name")
     public ResponseEntity<Product> updateName(@RequestParam("name") @NotBlank String name, @RequestParam("id") @NotBlank String id) throws VsserviceException {
-        return this.productService.updateName(name, id)
+        return Optional.ofNullable(this.productService.updateName(name, id))
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseThrow(() -> new VsserviceException(new RuntimeException()));
     }
 
     @PatchMapping("/price")
     public ResponseEntity<Product> updatePrice(@RequestParam("price") @NotNull BigDecimal price, @RequestParam("id") @NotBlank String id) throws VsserviceException {
-        return this.productService.updatePrice(price, id)
+        return Optional.ofNullable(this.productService.updatePrice(price, id))
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseThrow(() -> new VsserviceException(new RuntimeException()));
     }
