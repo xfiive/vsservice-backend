@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import org.vsservice.vsservice.models.roles.Admin;
 import org.vsservice.vsservice.services.AdminService;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class AdminInitializer {
@@ -17,11 +19,11 @@ public class AdminInitializer {
 
     @PostConstruct
     public void init() {
-        adminService.getAdminByUsername(ADMIN_LOGIN)
-                .orElseGet(() -> adminService.registerAdmin(Admin.builder()
+        Optional.ofNullable(adminService.getAdminByUsername(ADMIN_LOGIN))
+                .orElseGet(() -> Optional.of(adminService.registerAdmin(Admin.builder()
                         .username(ADMIN_LOGIN)
                         .password(ADMIN_PASSWORD)
-                        .build()).orElseThrow(() -> new RuntimeException("Failed to register admin")));
+                        .build())).orElseThrow(() -> new RuntimeException("Failed to register admin")));
     }
 
 

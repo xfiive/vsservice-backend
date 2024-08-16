@@ -38,14 +38,14 @@ public class AdminController {
 
     @PostMapping("/register")
     public ResponseEntity<Admin> registerAdmin(@Validated @RequestBody Admin admin) {
-        return this.adminService.registerAdmin(admin)
+        return Optional.ofNullable(this.adminService.registerAdmin(admin))
                 .map(registeredAdmin -> new ResponseEntity<>(registeredAdmin, HttpStatus.CREATED))
                 .orElseThrow(() -> new AuthenticationException("Failed to register a new admin", "Such admin already exists"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AdminDto> authenticateAdmin(@Validated @RequestBody Admin admin, HttpServletResponse response) {
-        return adminService.authenticateAdmin(admin.getUsername(), admin.getPassword())
+        return Optional.ofNullable(adminService.authenticateAdmin(admin.getUsername(), admin.getPassword()))
                 .map(authenticatedAdmin -> {
                     log.info("Login successful for user: {}", authenticatedAdmin.getUsername());
 
