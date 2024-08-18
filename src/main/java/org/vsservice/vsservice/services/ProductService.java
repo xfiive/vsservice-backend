@@ -23,13 +23,12 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@SuppressWarnings({"deprecation", "unused"})
 public class ProductService {
 
     private final ProductRepository productRepository;
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = VsserviceException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @Cacheable(value = "products", key = "#id")
@@ -40,7 +39,7 @@ public class ProductService {
 
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "products", key = "#product.id")
@@ -53,7 +52,7 @@ public class ProductService {
     }
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "products", key = "#id")
@@ -69,7 +68,7 @@ public class ProductService {
 
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "products", key = "#id")
@@ -83,7 +82,7 @@ public class ProductService {
 
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "products", key = "#id")
@@ -96,7 +95,7 @@ public class ProductService {
     }
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "products", key = "#id")
@@ -109,7 +108,7 @@ public class ProductService {
     }
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "products", key = "#id")
@@ -122,7 +121,7 @@ public class ProductService {
     }
 
     @Transactional
-    @Retryable(value = {VsserviceException.class},
+    @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CacheEvict(value = "products", key = "#id")
@@ -134,24 +133,28 @@ public class ProductService {
     }
 
     @Recover
+    @SuppressWarnings("unused")
     public Product recoverVsserviceException(@NotNull VsserviceException e, String id) {
         log.error("Failed after retries. Exception: {}", e.getMessage());
         return null;
     }
 
     @Recover
+    @SuppressWarnings("unused")
     public Product recoverFromGetProduct(@NotNull VsserviceException e, String id) {
         log.error("Failed to retrieve product with id: {} after retries. Exception: {}", id, e.getMessage());
         return null;
     }
 
     @Recover
+    @SuppressWarnings("unused")
     public Product recoverFromAddProduct(@NotNull VsserviceException e, Product product) {
         log.error("Failed to add product after retries. Exception: {}", e.getMessage());
         return null;
     }
 
     @Recover
+    @SuppressWarnings("unused")
     public Product recoverFromUpdateProduct(@NotNull VsserviceException e, Product product, String id) {
         log.error("Failed to update product with id: {} after retries. Exception: {}", id, e.getMessage());
         return null;
