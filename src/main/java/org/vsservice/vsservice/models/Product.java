@@ -54,4 +54,14 @@ public class Product {
         this.setProperties(product.getProperties());
         this.setPrice(product.getPrice());
     }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id='" + id + '\'' +
+                ", properties=" + properties +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
 }
