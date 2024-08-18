@@ -10,10 +10,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.vsservice.vsservice.models.errors.AuthenticationException;
 import org.vsservice.vsservice.models.errors.VsserviceException;
 import org.vsservice.vsservice.models.roles.Admin;
 import org.vsservice.vsservice.repositories.AdminRepository;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -24,10 +25,10 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     @Cacheable(value = "admins", key = "#username", unless = "#result == null")
-    @SuppressWarnings("all")
-    public Admin getAdminByUsername(String username) {
-        return adminRepository.findByUsername(username).get();
+    public Optional<Admin> getAdminByUsername(String username) {
+        return adminRepository.findByUsername(username);
     }
+
 
     @Caching(
             evict = {@CacheEvict(value = "admins", key = "#admin.id")},
@@ -42,16 +43,10 @@ public class AdminService {
     }
 
     @Cacheable(value = "admins", key = "#username", unless = "#result == null")
-    public Admin authenticateAdmin(String username, String password) {
+    public Optional<Admin> authenticateAdmin(String username, String password) {
         return adminRepository.findByUsername(username)
-                .map(existingAdmin -> {
-                    if (passwordEncoder.matches(password, existingAdmin.getPassword())) {
-                        return existingAdmin;
-                    } else {
-                        return null;
-                    }
-                })
-                .orElseThrow(() -> new AuthenticationException("Failed to authenticate user", "Invalid login data"));
+                .filter(existingAdmin -> passwordEncoder.matches(password, existingAdmin.getPassword()))
+                .or(Optional::empty);
     }
 
 

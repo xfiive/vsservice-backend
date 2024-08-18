@@ -45,7 +45,7 @@ public class AdminController {
 
     @PostMapping("/login")
     public ResponseEntity<AdminDto> authenticateAdmin(@Validated @RequestBody Admin admin, HttpServletResponse response) {
-        return Optional.ofNullable(adminService.authenticateAdmin(admin.getUsername(), admin.getPassword()))
+        return adminService.authenticateAdmin(admin.getUsername(), admin.getPassword())
                 .map(authenticatedAdmin -> {
                     log.info("Login successful for user: {}", authenticatedAdmin.getUsername());
 
