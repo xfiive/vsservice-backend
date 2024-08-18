@@ -47,12 +47,18 @@ public class Product {
     @JsonProperty("price")
     private BigDecimal price;
 
+    @Field
+    @JsonProperty("categoryId")
+    @NotBlank(message = "Category ID cannot be null")
+    private String categoryId;
+
     synchronized public void copyProduct(@org.jetbrains.annotations.NotNull Product product, String id) {
         this.setId(id);
         this.setImageBase64(product.getImageBase64());
         this.setName(product.getName());
         this.setProperties(product.getProperties());
         this.setPrice(product.getPrice());
+        this.setCategoryId(product.getCategoryId());
     }
 
     @Override
@@ -62,6 +68,7 @@ public class Product {
                 ", properties=" + properties +
                 ", name='" + name + '\'' +
                 ", price=" + price +
+                ", categoryId='" + categoryId + '\'' +
                 '}';
     }
 }
