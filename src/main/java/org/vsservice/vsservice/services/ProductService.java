@@ -42,7 +42,7 @@ public class ProductService {
     @Retryable(retryFor = {VsserviceException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
-    @CachePut(value = "products", key = "#product.id")
+    @CachePut(value = "products", key = "#product.name")
     public Optional<Product> addProduct(@NotNull Product product) {
         if (product.getId() != null && productRepository.findById(product.getId()).isPresent()) {
             throw new VsserviceException("Failed to add new product", "Such product already exists");
