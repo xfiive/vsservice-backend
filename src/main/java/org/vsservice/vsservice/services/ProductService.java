@@ -48,6 +48,7 @@ public class ProductService {
         if (product.getId() != null && productRepository.findById(product.getId()).isPresent()) {
             throw new VsserviceException("Failed to add new product", "Such product already exists");
         }
+
         return Optional.of(productRepository.save(product));
     }
 

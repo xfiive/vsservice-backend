@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @Validated
 @RestController
+@Slf4j
 @RequestMapping("/api/products")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ProductController {
@@ -34,6 +36,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> addProduct(@Valid @RequestBody Product product) throws VsserviceException {
+        log.info("Product added: {}", product);
         return this.productService.addProduct(product)
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseThrow(() -> new VsserviceException(new RuntimeException()));
