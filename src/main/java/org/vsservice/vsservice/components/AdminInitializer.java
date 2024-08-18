@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.vsservice.vsservice.models.roles.Admin;
-import org.vsservice.vsservice.services.AdminService;
+import org.vsservice.vsservice.services.moderation.AdminService;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)

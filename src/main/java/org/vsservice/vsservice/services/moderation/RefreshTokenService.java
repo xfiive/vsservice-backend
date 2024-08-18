@@ -1,4 +1,4 @@
-package org.vsservice.vsservice.services;
+package org.vsservice.vsservice.services.moderation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

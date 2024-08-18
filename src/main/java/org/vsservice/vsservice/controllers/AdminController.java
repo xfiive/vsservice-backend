@@ -19,8 +19,8 @@ import org.vsservice.vsservice.models.errors.AuthenticationException;
 import org.vsservice.vsservice.models.errors.TokenRefreshException;
 import org.vsservice.vsservice.models.roles.Admin;
 import org.vsservice.vsservice.models.security.RefreshToken;
-import org.vsservice.vsservice.services.AdminService;
-import org.vsservice.vsservice.services.RefreshTokenService;
+import org.vsservice.vsservice.services.moderation.AdminService;
+import org.vsservice.vsservice.services.moderation.RefreshTokenService;
 
 import java.util.Arrays;
 import java.util.Optional;
