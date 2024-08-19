@@ -27,9 +27,9 @@ public class VsserviceErrorResponse extends Throwable implements ErrorResponse {
     private final String clientIp;
     private final Map<String, String> headers;
     private final String causeDescription;
-    private final VsserviceException cause;
+    private final Exception cause;
 
-    public VsserviceErrorResponse(HttpStatusCode statusCode, String detail, String path, String method, String clientIp, Map<String, String> headers, String causeDescription, VsserviceException cause) {
+    public VsserviceErrorResponse(HttpStatusCode statusCode, String detail, String path, String method, String clientIp, Map<String, String> headers, String causeDescription, Exception cause) {
         this.statusCode = statusCode;
         this.causeDescription = causeDescription;
         this.cause = cause;

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vsservice.vsservice.models.Category;
 import org.vsservice.vsservice.models.Product;
-import org.vsservice.vsservice.models.errors.VsserviceException;
+import org.vsservice.vsservice.models.errors.CategoryServiceException;
 import org.vsservice.vsservice.repositories.CategoryRepository;
 
 import java.util.List;
@@ -27,42 +27,42 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    @Retryable(retryFor = VsserviceException.class,
+    @Retryable(retryFor = CategoryServiceException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "categories", key = "#category.name")
     public Category addCategory(@NotNull Category category) {
         if (category.getId() != null && categoryRepository.existsById(category.getId())) {
-            throw new VsserviceException("Failed to add new category", "Such category already exists");
+            throw new CategoryServiceException("Failed to add new category", "Such category already exists");
         }
 
         return categoryRepository.save(category);
     }
 
     @Transactional
-    @Retryable(retryFor = VsserviceException.class,
+    @Retryable(retryFor = CategoryServiceException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CacheEvict(value = "categories", key = "#id")
     public void deleteCategory(@NotNull String id) {
         if (!categoryRepository.existsById(id))
-            throw new VsserviceException("Failed to delete category", "Such category does not exist");
+            throw new CategoryServiceException("Failed to delete category", "Such category does not exist");
 
         categoryRepository.deleteById(id);
     }
 
     @Transactional
-    @Retryable(retryFor = VsserviceException.class,
+    @Retryable(retryFor = CategoryServiceException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @Cacheable(value = "categories", key = "#id")
     public Category getCategory(String id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new VsserviceException("Failed to find category", "Invalid id provided or category does not exist"));
+                .orElseThrow(() -> new CategoryServiceException("Failed to find category", "Invalid id provided or category does not exist"));
     }
 
     @Transactional
-    @Retryable(retryFor = VsserviceException.class,
+    @Retryable(retryFor = CategoryServiceException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @Cacheable(value = "categories", key = "getMethodName()")
@@ -71,13 +71,13 @@ public class CategoryService {
     }
 
     @Transactional
-    @Retryable(retryFor = VsserviceException.class,
+    @Retryable(retryFor = CategoryServiceException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 250))
     @CachePut(value = "categories", key = "#id")
     public Category updateCategory(String id, Category newCategory) {
         if (!categoryRepository.existsById(id))
-            throw new VsserviceException("Failed to update category", "Such category does not exist");
+            throw new CategoryServiceException("Failed to update category", "Such category does not exist");
 
         newCategory.setId(id);
 
@@ -86,28 +86,28 @@ public class CategoryService {
 
     @Recover
     @SuppressWarnings("unused")
-    public Category recoverVsserviceException(@NotNull VsserviceException e, String id) {
+    public Category recoverCategoryServiceException(@NotNull CategoryServiceException e, String id) {
         log.error("Failed after retries. Exception: {}", e.getMessage());
         return null;
     }
 
     @Recover
     @SuppressWarnings("unused")
-    public Category recoverFromGetCategory(@NotNull VsserviceException e, String id) {
+    public Category recoverFromGetCategory(@NotNull CategoryServiceException e, String id) {
         log.error("Failed to retrieve category with id: {} after retries. Exception: {}", id, e.getMessage());
         return null;
     }
 
     @Recover
     @SuppressWarnings("unused")
-    public Category recoverFromAddCategory(@NotNull VsserviceException e, String id) {
+    public Category recoverFromAddCategory(@NotNull CategoryServiceException e, String id) {
         log.error("Failed to add category with id: {} after retries. Exception: {}", id, e.getMessage());
         return null;
     }
 
     @Recover
     @SuppressWarnings("unused")
-    public Category recoverFromUpdateCategory(@NotNull VsserviceException e, Product product, String id) {
+    public Category recoverFromUpdateCategory(@NotNull CategoryServiceException e, Product product, String id) {
         log.error("Failed to update category with id: {} after retries. Exception: {}", id, e.getMessage());
         return null;
     }

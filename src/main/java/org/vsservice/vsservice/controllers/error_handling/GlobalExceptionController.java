@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.vsservice.vsservice.models.errors.CategoryServiceException;
+import org.vsservice.vsservice.models.errors.ProductServiceException;
 import org.vsservice.vsservice.models.errors.VsserviceErrorResponse;
 import org.vsservice.vsservice.models.errors.VsserviceException;
 
@@ -57,6 +59,40 @@ public class GlobalExceptionController {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
 
+    @ExceptionHandler(CategoryServiceException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryServiceException(@NotNull CategoryServiceException exception, WebRequest request) {
+        RequestData requestData = getRequestData((ServletWebRequest) request);
+
+        VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
+                HttpStatus.NOT_ACCEPTABLE,
+                "Error on fetching data: " + exception.getMessage(),
+                requestData.path,
+                requestData.method,
+                requestData.clientIp,
+                requestData.headers,
+                exception.getCauseMessage(),
+                exception
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler(ProductServiceException.class)
+    public ResponseEntity<ErrorResponse> handleProductServiceException(@NotNull ProductServiceException exception, WebRequest request) {
+        RequestData requestData = getRequestData((ServletWebRequest) request);
+
+        VsserviceErrorResponse errorResponse = new VsserviceErrorResponse(
+                HttpStatus.NOT_ACCEPTABLE,
+                "Error on fetching data: " + exception.getMessage(),
+                requestData.path,
+                requestData.method,
+                requestData.clientIp,
+                requestData.headers,
+                exception.getCauseMessage(),
+                exception
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(@NotNull MethodArgumentNotValidException exception, WebRequest request) {
         RequestData requestData = getRequestData((ServletWebRequest) request);
@@ -69,7 +105,7 @@ public class GlobalExceptionController {
                 requestData.clientIp,
                 requestData.headers,
                 exception.getCause().getMessage(),
-                new VsserviceException(exception)
+                exception
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
@@ -86,7 +122,7 @@ public class GlobalExceptionController {
                 requestData.clientIp,
                 requestData.headers,
                 exception.getCause().getMessage(),
-                new VsserviceException(exception)
+                exception
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
@@ -103,7 +139,7 @@ public class GlobalExceptionController {
                 requestData.clientIp,
                 requestData.headers,
                 exception.getCause().getMessage(),
-                new VsserviceException(exception)
+                exception
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
@@ -121,7 +157,7 @@ public class GlobalExceptionController {
                 requestData.clientIp,
                 requestData.headers,
                 exception.getCause().getMessage(),
-                new VsserviceException(exception)
+                exception
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
@@ -138,7 +174,7 @@ public class GlobalExceptionController {
                 requestData.clientIp,
                 requestData.headers,
                 exception.getCause() != null ? exception.getCause().getMessage() : null,
-                new VsserviceException(exception)
+                exception
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
@@ -155,7 +191,7 @@ public class GlobalExceptionController {
                 requestData.clientIp,
                 requestData.headers,
                 exception.getCause() != null ? exception.getCause().getMessage() : null,
-                new VsserviceException(exception)
+                exception
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
