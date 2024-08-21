@@ -42,6 +42,10 @@ public class Category {
     private List<Category> children = new ArrayList<>();
 
     @Field
+    @JsonProperty("imageBase64")
+    private String imageBase64;
+
+    @Field
     @JsonProperty("description")
     private String description;
 
@@ -52,5 +56,6 @@ public class Category {
         this.children = srcCategory.getChildren();
         this.description = srcCategory.getDescription();
         this.fullPath = srcCategory.getFullPath();
+        this.imageBase64 = srcCategory.getImageBase64();
     }
 }
