@@ -34,6 +34,11 @@ public class ProductController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> getProductsByCategory(@RequestParam("categoryId") @NotBlank String categoryId) {
+        return new ResponseEntity<>(this.productService.getProductsByCategory(categoryId), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Product> addProduct(@Valid @RequestBody Product product) throws VsserviceException {
         log.info("Product added: {}", product);

@@ -37,6 +37,14 @@ public class ProductService {
                 .orElseThrow(() -> new ProductServiceException("Failed to add new product", "Such product already exists"));
     }
 
+    @Transactional
+    @Retryable(retryFor = ProductServiceException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 250))
+    @Cacheable(value = "products", key = "#categoryId")
+    public List<Product> getProductsByCategory(String categoryId) {
+        return this.productRepository.findALlByCategoryId(categoryId);
+    }
 
     @Transactional
     @Retryable(retryFor = {ProductServiceException.class},
