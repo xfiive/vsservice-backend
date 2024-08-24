@@ -29,13 +29,15 @@ public class ProductController {
 
     @GetMapping("/search")
     public ResponseEntity<Product> getProduct(@RequestParam("id") @NotBlank String id) {
+        log.info("Search for product with id: {}", id);
         return Optional.ofNullable(this.productService.getProduct(id))
                 .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
-    @GetMapping("/search")
+    @GetMapping("/search/category")
     public ResponseEntity<List<Product>> getProductsByCategory(@RequestParam("categoryId") @NotBlank String categoryId) {
+        log.info("Search for products in category with id: {}", categoryId);
         return new ResponseEntity<>(this.productService.getProductsByCategory(categoryId), HttpStatus.OK);
     }
 
@@ -49,6 +51,7 @@ public class ProductController {
 
     @PutMapping
     public ResponseEntity<Product> updateProduct(@Valid @RequestBody Product product, @RequestParam("id") @NotBlank String id) throws VsserviceException {
+        log.info("Product updated: {}  with id: {}", product, id);
         return Optional.ofNullable(this.productService.updateProduct(product, id))
                 .map(updatedProduct -> new ResponseEntity<>(updatedProduct, HttpStatus.OK))
                 .orElseThrow(() -> new VsserviceException("Failed to update product", "Product not found"));
